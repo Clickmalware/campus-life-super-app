@@ -6,13 +6,38 @@
     <title>About — Campus Life Super App</title>
     <style>
         :root{
-            --bg:#0f1724; --card:#5f6062; --muted:#9aa4b2; --accent:#6ee7b7;
+            --bg:#0f1724; --card:#5f6062; --muted:#9aa4b2; --accent:#fb0000;
             --glass: rgba(255,255,255,0.03);
             font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
             color:#e6eef6;
         }
         html,body{height:100%;margin:0;background:linear-gradient(180deg,#071026 0%, #071827 60%);}
         .wrap{max-width:920px;margin:36px auto;padding:24px;}
+        /* top navigation */
+        .topnav{
+            display:flex;
+            gap:10px;
+            align-items:center;
+            margin-bottom:12px;
+            flex-wrap:wrap;
+        }
+        .topnav a{
+            padding:8px 12px;
+            border-radius:8px;
+            color:var(--accent);
+            background:rgba(255,255,255,0.02);
+            text-decoration:none;
+            font-weight:600;
+            font-size:14px;
+            transition:transform .12s ease, background .12s ease;
+        }
+        .topnav a:hover{ transform:translateY(-2px); background:rgba(255,255,255,0.03); }
+        .topnav a[aria-current="page"]{
+            background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            color:#fff;
+            box-shadow: 0 6px 18px rgba(3,6,18,0.45);
+        }
+
         header{display:flex;gap:16px;align-items:center}
         .weather {
             display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--glass);border-radius:12px;
@@ -34,6 +59,14 @@
 </head>
 <body>
     <div class="wrap">
+        <!-- Top navigation links to other pages -->
+        <nav class="topnav" aria-label="Main navigation">
+            <a href="homepage.html">Home</a>
+            <a href="eventpage.html">Events</a>
+            <a href="diningpage.html">Dining</a>
+            <a href="aboutpage.html">About</a>
+        </nav>
+
         <header>
             <div class="weather" id="weather">
                 <div class="icon" id="weather-icon">⏳</div>
@@ -63,20 +96,14 @@
 
                     <h3>Features</h3>
                     <ul>
-                        <li>Event listings and RSVP</li>
-                        <li>Maps and building hours</li>
-                        <li>Push notifications for emergency alerts</li>
-                        <li>Local weather snapshot (shown at top)</li>
+                        <li>Event listings </li>
+                        <li>Dinning Options</li>
+                        <li>School Information</li>
+                        <li>Local Weather </li>
                     </ul>
                 </div>
             </div>
 
-            <aside>
-                <div class="card">
-                    <h3 style="margin-top:0">Quick tips</h3>
-                    <p class="small">If you want temperatures in Celsius or different units, the weather request can be adjusted in the source code to use other units or additional forecast fields.</p>
-                </div>
-            </aside>
         </div>
 
         <footer style="margin-top:20px;color:var(--muted);font-size:13px">
