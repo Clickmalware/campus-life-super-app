@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Campus Cafeteria — Daily Menu</title>
+    <style>
+        :root{
+            --bg:#f6f7fb; --card:#fff; --accent:#fb0000; --muted:#6b7280;
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+            background:linear-gradient(180deg,#eef2ff 0%,var(--bg) 50%); color:#0f172a;
+            min-height:100vh;
+            /* space for fixed top and bottom navs */
+            padding:84px 24px 84px;
+        }
+
+        /* Top navigation (fixed) */
+        .top-nav{
+            position:fixed; inset:0 auto auto 0; top:0; left:0; right:0;
+            height:60px; background:var(--card); display:flex; align-items:center;
+            gap:12px; padding:0 20px; box-shadow:0 4px 24px rgba(2,6,23,0.06); z-index:60;
+        }
+        .top-nav .brand{font-weight:700; margin-right:12px; color:var(--accent)}
+        .top-nav nav{display:flex; gap:8px; align-items:center; margin-left:auto}
+        .top-nav a{
+            text-decoration:none;color:var(--muted);padding:8px 10px;border-radius:8px;font-size:14px;
+        }
+        .top-nav a.active{color:var(--accent); font-weight:600; background:linear-gradient(180deg, rgba(43,124,255,0.06), transparent);}
+
+        header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+        h1{font-size:20px;margin:0}
+        .controls{margin-left:auto;display:flex;gap:8px;align-items:center}
+        input[type="date"], .search, select{
+            padding:8px 10px;border-radius:8px;border:1px solid #d1d5db;background:#fff;
+            font-size:14px;
+        }
+        .toolbar{display:flex;gap:8px;align-items:center}
+        .chip{background:var(--card);padding:6px 10px;border-radius:999px;border:1px solid #e6e9f2;font-size:13px;cursor:pointer}
+        main{max-width:1100px;margin:0 auto}
+        .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+        .meal-card{
+            background:var(--card);padding:14px;border-radius:12px;border:1px solid #e8eefc;
+            box-shadow:0 1px 2px rgba(16,24,40,0.04);
+        }
+        .meal-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+        .meal-title{font-weight:600}
+        .tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+        .tag{font-size:12px;padding:4px 8px;border-radius:999px;background:#f1f5f9;color:var(--muted)}
+        .item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px dashed #eef2ff}
+        .item:first-of-type{border-top:none}
+        .fav{background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px}
+        .fav.active{color:#f59e0b}
+        .filters{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+        .legend{font-size:13px;color:var(--muted);margin-bottom:6px}
+        .no-data{text-align:center;color:var(--muted);padding:32px 12px}
+        footer{max-width:1100px;margin:18px auto 0;color:var(--muted);font-size:13px;text-align:center}
+
+        /* bottom navigation (fixed) */
+        .bottom-nav{
+            position:fixed; left:0; right:0; bottom:0; height:60px; background:var(--card);
+            box-shadow:0 -4px 24px rgba(2,6,23,0.06); display:flex; align-items:center; justify-content:center;
+            z-index:60;
+        }
+        .bottom-nav nav{display:flex; gap:12px; align-items:center}
+        .bottom-nav a{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:var(--muted);font-size:12px;padding:6px 8px;border-radius:8px}
+        .bottom-nav a.active{color:var(--accent); font-weight:600}
+
+        /* modal */
+        .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.4);display:none;align-items:center;justify-content:center;padding:20px;z-index:70}
+        .modal{background:var(--card);padding:18px;border-radius:12px;max-width:540px;width:100%;box-shadow:0 8px 30px rgba(2,6,23,0.2)}
+        .modal h3{margin:0 0 8px 0}
+        .close{float:right;background:transparent;border:none;font-size:18px;cursor:pointer;color:var(--muted)}
+        @media (max-width:520px){header{flex-direction:column;align-items:flex-start} .controls{margin-left:0;width:100%;justify-content:space-between}}
+    </style>
+</head>
+<body>
+    <div class="top-nav" role="navigation" aria-label="Primary">
+        <div class="brand">Campus Life</div>
+        <div style="color:var(--muted);font-size:13px">Dining</div>
+        <nav aria-label="Top navigation">
+            <a href="homepage.html" data-nav="Home">Home</a>
+            <a href="diningpage.html" data-nav="dining">Dining</a>
+            <a href="eventpage.html" data-nav="events">Events</a>
+            <a href="aboutpage.html" data-nav="map">Map</a>
+        </nav>
+    </div>
+
+    <header>
+        <div>
+            <h1>Campus Cafeteria — Daily Menu</h1>
+            <div style="color:var(--muted);font-size:13px">See what's served today and filter by preferences</div>
+        </div>
+
+        <div class="controls" role="region" aria-label="Controls"></div>
+            <div class="toolbar">
+                <label for="day" class="chip" title="Pick a date">Date
+                    <input id="day" type="date" value="" style="border:none;background:transparent;margin-left:8px;cursor:pointer">
+                </label>
+            </div>
+            <input id="search" class="search" placeholder="Search meals or ingredients" aria-label="Search meals" />
+            <select id="mealView" aria-label="Meal view">
+                <option value="all">All meals</option>
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+            </select>
+        </div>
+    </header>
+
+    <main>
+        <div class="filters" role="region" aria-label="Filters">
+            <div class="legend">Filters:</div>
+            <button class="chip" data-filter="veg">Vegetarian</button>
+            <button class="chip" data-filter="vegan">Vegan</button>
+            <button class="chip" data-filter="gf">Gluten-free</button>
+            <button class="chip" id="clearFilters">Clear</button>
+        </div>
+
+        <section id="menu" aria-live="polite"></section>
+
+        <div id="noData" class="no-data" hidden>No menu available for this date or filters.</div>
+    </main>
+
+    <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal" role="document">
+            <button class="close" id="closeModal" aria-label="Close modal">&times;</button>
+            <h3 id="modalTitle">Item name</h3>
+            <div id="modalBody" style="color:var(--muted);font-size:14px"></div>
+        </div>
+    </div>
+
+    <footer>
+        Tip: Click the star to favorite items. Favorites persist on this device.
+    </footer>
+
+    <div class="bottom-nav" role="navigation" aria-label="Bottom navigation">
+        <nav>
+            <a href="homepage.html" data-nav="index" aria-label="Home">🏠<span>Home</span></a>
+            <a href="diningpage.html" data-nav="dining" aria-label="Dining">🍽️<span>Dining</span></a>
+            <a href="eventpage.html" data-nav="events" aria-label="Events">📅<span>Events</span></a>
+            <a href="aboutpage.html" data-nav="About" aria-label="About">🗺️<span>Map</span></a>
+        </nav>
+    </div>
+
+    <script>
+        // set active nav items based on filename
+        (function(){
+            const file = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+            const map = {
+                'index.html':'index',
+                '':'index',
+                'diningpage.html':'dining',
+                'events.html':'events',
+                'map.html':'map',
+                'profile.html':'profile'
+            };
+            const key = map[file] || 'index';
+            document.querySelectorAll('[data-nav]').forEach(a=>{
+                if(a.dataset.nav===key) a.classList.add('active');
+            });
+        })();
+    </script>
+
+    <script>
+        
+        (function(){
+            // Sample menu dataset keyed by ISO date. In real app this would come from API.
+            const sampleMenus = {
+                // todays date will be populated below
+                // "2025-10-05": [...]
+            };
+
+            // Generate a few sample days relative to today
+            const iso = d => d.toISOString().slice(0,10);
+            const today = new Date();
+            const dates = [0,1,-1,2].map(offset=>{
+                const dt = new Date(today); dt.setDate(dt.getDate()+offset); return iso(dt);
+            });
+            sampleMenus[dates[0]] = {
+                breakfast:[
+                    {id:'b1',name:'Scrambled Eggs & Toast',desc:'Free-range eggs, multigrain toast.',tags:['vegetarian'],cal:320},
+                    {id:'b2',name:'Greek Yogurt Parfait',desc:'Yogurt, granola, seasonal fruit.',tags:['vegetarian'],cal:290},
+                ],
+                lunch:[
+                    {id:'l1',name:'Grilled Chicken Bowl',desc:'Rice, roasted veggies, teriyaki glaze.',tags:[],cal:610},
+                    {id:'l2',name:'Veggie Wrap',desc:'Hummus, peppers, spinach in whole wheat.',tags:['vegetarian'],cal:450},
+                    {id:'l3',name:'Gluten-Free Pasta Primavera',desc:'Rice pasta with seasonal vegetables.',tags:['vegetarian','gf'],cal:520},
+                ],
+                dinner:[
+                    {id:'d1',name:'Beef Stir Fry',desc:'Stir-fried beef with broccoli over jasmine rice.',tags:[],cal:680},
+                    {id:'d2',name:'Vegan Chili',desc:'Beans, tomato, peppers — hearty and spicy.',tags:['vegan','gf'],cal:400},
+                ]
+            };
+            sampleMenus[dates[1]] = {
+                breakfast:[
+                    {id:'b3',name:'Oatmeal Bar',desc:'Toppings: nuts, fruit, honey.',tags:['vegetarian'],cal:260},
+                ],
+                lunch:[
+                    {id:'l4',name:'Fish Tacos',desc:'Cabbage slaw, lime crema.',tags:[],cal:530},
+                    {id:'l5',name:'Quinoa Salad',desc:'Quinoa, cucumber, cherry tomato.',tags:['vegan','gf'],cal:380},
+                ],
+                dinner:[
+                    {id:'d3',name:'Pasta Bolognese',desc:'Rich meat sauce.',tags:[],cal:720},
+                ]
+            };
+            sampleMenus[dates[2]] = {
+                breakfast:[
+                    {id:'b4',name:'Pancakes',desc:'Maple syrup on the side.',tags:[],cal:420},
+                ],
+                lunch:[
+                    {id:'l6',name:'Margherita Pizza',desc:'Fresh basil and mozzarella.',tags:['vegetarian'],cal:700},
+                ],
+                dinner:[
+                    {id:'d4',name:'Stuffed Peppers',desc:'Rice, vegetables, tomato sauce.',tags:['vegetarian','gf'],cal:480},
+                ]
+            };
+
+            // Elements
+            const dayInput = document.getElementById('day');
+            const menuEl = document.getElementById('menu');
+            const noData = document.getElementById('noData');
+            const search = document.getElementById('search');
+            const mealView = document.getElementById('mealView');
+            const filterButtons = document.querySelectorAll('[data-filter]');
+            const clearFilters = document.getElementById('clearFilters');
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const closeModal = document.getElementById('closeModal');
+
+            // state
+            let state = {
+                date: iso(today),
+                q: '',
+                meal: 'all',
+                filters: new Set(),
+                favorites: new Set(JSON.parse(localStorage.getItem('cafeteriaFavorites')||'[]'))
+            };
+
+            // init date input default
+            dayInput.value = state.date;
+
+            // helpers
+            function matchesFilters(item){
+                if(state.filters.size===0) return true;
+                for(const f of state.filters){
+                    if(f==='veg' && !item.tags.includes('vegetarian')) return false;
+                    if(f==='vegan' && !item.tags.includes('vegan')) return false;
+                    if(f==='gf' && !item.tags.includes('gf')) return false;
+                }
+                return true;
+            }
+            function matchesSearch(item){
+                if(!state.q) return true;
+                const s = state.q.toLowerCase();
+                return item.name.toLowerCase().includes(s) || (item.desc && item.desc.toLowerCase().includes(s));
+            }
+
+            function render(){
+                menuEl.innerHTML='';
+                const data = sampleMenus[state.date] || {};
+                const mealOrder = ['breakfast','lunch','dinner'];
+                let visibleCount = 0;
+
+                mealOrder.forEach(mealKey=>{
+                    if(state.meal !== 'all' && state.meal !== mealKey) return;
+                    const items = (data[mealKey] || []).filter(i=>matchesFilters(i) && matchesSearch(i));
+                    if(items.length===0) return;
+                    visibleCount += items.length;
+
+                    const section = document.createElement('section');
+                    section.className = 'meal-card';
+                    const header = document.createElement('div'); header.className='meal-header';
+                    const title = document.createElement('div'); title.className='meal-title'; title.textContent = mealKey.charAt(0).toUpperCase()+mealKey.slice(1);
+                    const tagWrap = document.createElement('div'); tagWrap.className='tags';
+                    // show simple tags for meal summary
+                    if(mealKey==='breakfast') tagWrap.innerHTML = '<span class="tag">Morning</span>';
+                    if(mealKey==='lunch') tagWrap.innerHTML = '<span class="tag">Noon</span>';
+                    if(mealKey==='dinner') tagWrap.innerHTML = '<span class="tag">Evening</span>';
+                    header.appendChild(title); header.appendChild(tagWrap);
+                    section.appendChild(header);
+
+                    items.forEach(item=>{
+                        const row = document.createElement('div'); row.className='item';
+                        const left = document.createElement('div');
+                        const name = document.createElement('div'); name.textContent = item.name; name.style.fontWeight=600;
+                        const desc = document.createElement('div'); desc.textContent = item.desc || ''; desc.style.fontSize='13px'; desc.style.color='var(--muted)';
+                        left.appendChild(name); left.appendChild(desc);
+
+                        const right = document.createElement('div'); right.style.display='flex'; right.style.alignItems='center'; right.style.gap='8px';
+                        if(item.tags && item.tags.length){
+                            const t = document.createElement('div');
+                            t.className='tag'; t.textContent = item.tags.join(', ');
+                            right.appendChild(t);
+                        }
+                        const info = document.createElement('button');
+                        info.className='chip'; info.textContent='Details'; info.onclick = ()=>openModal(item);
+                        const fav = document.createElement('button');
+                        fav.className='fav'; fav.innerHTML = state.favorites.has(item.id) ? '★' : '☆';
+                        if(state.favorites.has(item.id)) fav.classList.add('active');
+                        fav.title = 'Favorite';
+                        fav.onclick = ()=>{ toggleFav(item.id, fav); };
+                        right.appendChild(info); right.appendChild(fav);
+
+                        row.appendChild(left); row.appendChild(right);
+                        section.appendChild(row);
+                    });
+
+                    menuEl.appendChild(section);
+                });
+
+                noData.hidden = visibleCount !== 0;
+            }
+
+            function openModal(item){
+                modalTitle.textContent = item.name;
+                modalBody.innerHTML = `
+                    <div style="margin-bottom:8px;color:var(--muted)">${item.desc || ''}</div>
+                    <div style="font-size:13px;color:var(--muted)">Calories: ${item.cal || '—'}</div>
+                    <div style="margin-top:8px"><strong>Tags:</strong> ${(item.tags && item.tags.join(', ')) || 'none'}</div>
+                `;
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden','false');
+                closeModal.focus();
+            }
+
+            function closeModalFn(){
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden','true');
+            }
+
+            function toggleFav(id, btn){
+                if(state.favorites.has(id)){
+                    state.favorites.delete(id);
+                    btn.classList.remove('active');
+                    btn.innerHTML='☆';
+                } else {
+                    state.favorites.add(id);
+                    btn.classList.add('active');
+                    btn.innerHTML='★';
+                }
+                localStorage.setItem('cafeteriaFavorites', JSON.stringify([...state.favorites]));
+            }
+
+            // listeners
+            dayInput.addEventListener('change', e=>{
+                state.date = e.target.value;
+                render();
+            });
+            search.addEventListener('input', e=>{
+                state.q = e.target.value.trim();
+                render();
+            });
+            mealView.addEventListener('change', e=>{
+                state.meal = e.target.value;
+                render();
+            });
+            filterButtons.forEach(btn=>{
+                btn.addEventListener('click', ()=>{
+                    const f = btn.dataset.filter;
+                    if(state.filters.has(f)){
+                        state.filters.delete(f); btn.classList.remove('active');
+                        btn.style.outline = '';
+                    } else {
+                        state.filters.add(f); btn.classList.add('active');
+                        btn.style.outline = '2px solid rgba(43,124,255,0.12)';
+                    }
+                    render();
+                });
+            });
+            clearFilters.addEventListener('click', ()=>{
+                state.filters.clear();
+                filterButtons.forEach(b=>{ b.classList.remove('active'); b.style.outline=''; });
+                render();
+            });
+
+            closeModal.addEventListener('click', closeModalFn);
+            modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModalFn(); });
+            document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModalFn(); });
+
+            // initial
+            // ensure dayInput has a valid date; if empty fallback to nearest sample date
+            if(!sampleMenus[state.date]){
+                // pick first available sample date
+                const first = Object.keys(sampleMenus)[0];
+                if(first) { state.date = first; dayInput.value = first; }
+            }
+            render();
+
+        })();
+    </script>
+</body>
+</html>
